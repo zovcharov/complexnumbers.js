@@ -80,6 +80,22 @@
         },
 
         /**
+         * @returns {Complex}
+         */
+        copy () {
+            return new Complex(this.getReal(), this.getImaginary())
+        },
+
+        /** 
+         * @param {Complex} complexValue 
+         * @returns {boolean}
+         */
+        isEquals (complexValue) {
+            return this.getReal() === complexValue.getReal()
+                && this.getImaginary() === complexValue.getImaginary()
+        },
+
+        /**
          * @param {Complex} complexValue
          */
         add: function (complexValue) {
@@ -153,6 +169,24 @@
         let newReal = a.getReal() * b.getReal() - a.getImaginary() * b.getImaginary()
         let newImaginary = a.getImaginary() * b.getReal() + a.getReal() * b.getImaginary()
         return new Complex(newReal, newImaginary)
+    }
+
+    /**
+     * @param {Complex} a 
+     * @param {Complex} b 
+     * @returns {boolean}
+     */
+    Complex.isEquals = function (a, b) {
+        return a.getReal() === b.getReal()
+            && a.getImaginary() === b.getImaginary()
+    }
+
+    /**
+     * @param {Complex} complexValue 
+     * @returns {Complex}
+     */
+    Complex.copy = function (complexValue) {
+        return new Complex(complexValue.getReal(), complexValue.getImaginary())
     }
 
     ///////////////////////
