@@ -1,97 +1,182 @@
-const Helpers = require('./helpers')
-const Errors = require('./errors')
+(function(rootObject) {
+    'use strict'
 
-class Complex {
-    constructor(real, imaginary) {
-        if (!Helpers.isNumber(real)) {
-            throw new Errors.InputValueError('real number')
+    var boolean  = 'boolean',
+        string   = 'string',
+        number   = 'number',
+        object   = 'object'
+
+    function isNumber (value) {
+        return typeof value === number && isFinite(value)
+    }
+
+    function isComplex (value) {
+        return value instanceof Complex
+    }
+
+    function checkNumber (value) {
+        if (!isNumber(value)) {
+            throw new Error('Input value is not number')
         }
-        if (!Helpers.isNumber(imaginary)) {
-            throw new Errors.InputValueError('imaginary number')
+        return true
+    }
+
+    function checkComplex (value) {
+        if (!isComplex(value)) {
+            throw new Error('Input value is not complex number')
         }
-
-        this.real = real
-        this.imaginary = imaginary
+        return true
     }
 
-    getReal() {
-        return this.real
+    function checkNumberOrComplex (value) {
+        if (!isNumber(value) && !isComplex(value)) {
+            throw new Error('Input value is not number or complex number')
+        }
+        return true
     }
 
-    getImaginary() {
-        return this.imaginary
+    /**
+     * @constructor
+     * @param {number | string} real 
+     * @param {number | undefined} imaginary 
+     */
+    function Complex (real, imaginary) {
+        this._real = real
+        this._imaginary = imaginary
     }
 
-    setReal (value) {
-        this.real = value
+    Complex.prototype = {
+        _real: 0,
+        _imaginary: 0,
+
+        /**
+         * @returns {number}
+         */
+        getReal () {
+            return this._real
+        },
+
+        /**
+         * @returns {number}
+         */
+        getImaginary () {
+            return this._imaginary
+        },
+
+        /**
+         * @param {number} value
+         */
+        setReal (value) {
+            checkNumber(value)
+            this._real = value
+        },
+
+        /**
+         * @param {number} value
+         */
+        setImaginary (value) {
+            checkNumber(value)
+            this._imaginary = value
+        },
+
+        /**
+         * @param {Complex} complexValue
+         */
+        add: function (complexValue) {
+            checkComplex(value)
+            this.setReal(this.getReal() + complexValue.getReal())
+            this.setImaginary(this.getImaginary() + complexValue.getImaginary())
+        },
+
+        /**
+         * @param {Complex} complexValue
+         */
+        sub: function (complexValue) {
+            checkComplex(value)
+            this.setReal(this.getReal() - complexValue.getReal())
+            this.setImaginary(this.getImaginary() - complexValue.getImaginary())
+        },
+
+        /**
+         * @param {Complex | number}
+         */
+        multiply: function (value) {            
+            checkNumberOrComplex(value)
+            if (isNumber(value)) {
+                this.setReal(this.getReal() * value)
+                this.setImaginary(this.getImaginary() * value)
+            } else {
+                this.setReal(this.getReal() * value.getReal() - this.getImaginary() * value.getImaginary())
+                this.setImaginary(this.getImaginary() * value.getReal() + this.getReal() * value.getImaginary())
+            }
+        }
     }
 
-    setImaginary (value) {
-        this.imaginary = value
-    }
+    //////////////////////
+    // STATIC FUNCTIONS //
+    //////////////////////
 
-    getReverse() {
-        return new Complex(-this.real, -this.imaginary)
-    }
-
-    toString () {
-        let imaginaryAsString = Helpers.numberToString(this.imaginary)
-        return `${this.real}${imaginaryAsString}i`
-    }
-
-    isEquals (value) {
-        return (this.getReal() === value.getReal() 
-            && this.getImaginary() === value.getImaginary())
-    }
-
-    copy (value) {
-        return new Complex(value.getReal(), value.getImaginary())
-    }
-
-    add (a) {
-        this.setReal(this.getReal() + a.getReal())
-        this.setImaginary(this.getImaginary() + a.getImaginary())
-        return this
-    }
-
-    sub (a) {
-        this.setReal(this.getReal() - a.getReal())
-        this.setImaginary(this.getImaginary() - a.getImaginary())
-        return this
-    }
-
-    static sum (a, b) {
+    /** 
+     * @param {Complex} a 
+     * @param {Complex} b 
+     * @return {Complex}
+     */
+    Complex.sum = function (a, b) {            
+        checkComplex(a)        
+        checkComplex(b)
         let newReal = a.getReal() + b.getReal()
         let newImaginary = a.getImaginary() + b.getImaginary()
         return new Complex(newReal, newImaginary)
     }
 
-    static diff (a, b) {
+    /** 
+     * @param {Complex} a 
+     * @param {Complex} b 
+     * @return {Complex}
+     */
+    Complex.diff = function (a, b) {          
+        checkComplex(a)        
+        checkComplex(b)
         let newReal = a.getReal() - b.getReal()
         let newImaginary = a.getImaginary() - b.getImaginary()
         return new Complex(newReal, newImaginary)
     }
 
-    static multiply (a, b) {
+    /** 
+     * @param {Complex} a 
+     * @param {Complex} b 
+     * @return {Complex}
+     */
+    Complex.multiply = function (a, b) {          
+        checkComplex(a)        
+        checkComplex(b)
         let newReal = a.getReal() * b.getReal() - a.getImaginary() * b.getImaginary()
         let newImaginary = a.getImaginary() * b.getReal() + a.getReal() * b.getImaginary()
         return new Complex(newReal, newImaginary)
     }
 
-    static isEquals (a, b) {
-        return (a.getReal() === b.getReal() 
-            && a.getImaginary() === b.getImaginary())
-    }
-}
+    ///////////////////////
+    //     CONSTANTS     //
+    ///////////////////////
 
-const COMPLEX = {
-    ZERO: new Complex(0, 0),
-    I: new Complex(0, 1),
-    PI: new Complex(Math.PI, 0),
-    E: new Complex(Math.E, 0),
-    INFINITY: new Complex(Infinity, Infinity),
-    NAN: new Complex(NaN, NaN),
-    EPSILON: 1e-16
-}
+    Complex.ZERO = new Complex(0, 0)
+    Complex.I = new Complex(0, 1)
+    Complex.PI = new Complex(Math.PI, 0)
+    Complex.E = new Complex(Math.E, 0)
+    Complex.INFINITY = new Complex(Infinity, Infinity)
+    Complex.NAN = new Complex(NaN, NaN)
+    Complex.EPSILON = 1e-16
 
-module.exports = Complex;
+    if (typeof define === 'function' && define['amd']) {
+        define([], function() {
+          return Complex
+        })
+      } else if (typeof exports === 'object') {
+        Object.defineProperty(exports, "__esModule", {'value': true})
+        Complex['default'] = Complex
+        Complex['Complex'] = Complex
+        module['exports'] = Complex
+      } else {
+        rootObject['Complex'] = Complex
+      }
+})(this)
